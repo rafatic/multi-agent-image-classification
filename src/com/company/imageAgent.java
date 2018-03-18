@@ -23,6 +23,34 @@ public class imageAgent extends Agent {
         this.originalPosition = (Point)this.currentPosition.clone();
 
 
+
     }
+
+    @Override
+    protected void activate() {
+        getLogger().info("Image agent activated on point " + originalPosition.x + ", " + currentPosition.y);
+        getLogger().info("Looking for the color " + RGBColor);
+    }
+
+    @Override
+    protected void live() {
+        getLogger().info("Belief : finding the color " + RGBColor);
+    }
+
+    @Override
+    protected void end() {
+        getLogger().info("Desactivation");
+    }
+
+    public void start()
+    {
+        executeThisAgent();
+    }
+
+    public static void main(int nbAgents)
+    {
+        executeThisAgent(nbAgents, true);
+    }
+
 
 }

@@ -18,6 +18,7 @@ public class guiManager extends JPanel{
     private JPanel pnl_main;
 
     private ArrayList<Point> germsCoordinates;
+
     private BufferedImage bi, originalImage;
 
 
@@ -63,16 +64,20 @@ public class guiManager extends JPanel{
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Button clicked, found " + germsCoordinates.size() + " germs");
-
+                ArrayList<imageAgent> workers = new ArrayList<>();
+                coordinatorAgent coordinator;
                 if(germsCoordinates.size() != 0)
                 {
                     System.out.println("Germs :");
                     for(Point x: germsCoordinates)
                     {
                         System.out.println(x.toString());
+                        workers.add(new imageAgent(originalImage.getRGB(x.x, x.y), x));
                     }
-
                 }
+                //coordinator = new coordinatorAgent(workers);
+
+                coordinatorAgent.main(germsCoordinates, originalImage);
 
             }
         });
