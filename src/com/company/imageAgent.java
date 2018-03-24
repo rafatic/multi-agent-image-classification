@@ -2,6 +2,8 @@ package com.company;
 
 import madkit.kernel.Agent;
 import madkit.kernel.Message;
+import madkit.message.IntegerMessage;
+import madkit.message.ObjectMessage;
 import madkit.message.StringMessage;
 
 import java.awt.*;
@@ -14,18 +16,32 @@ public class imageAgent extends Agent {
 
     private Point originalPosition;
     private Point currentPosition;
+    private int ID;
 
     private String group;
     private int RGBColor;
 
-    public imageAgent(int RGB, Point position)
+    public imageAgent(int RGB, Point position, int ID)
     {
         this.RGBColor = RGB;
         this.currentPosition = (Point)position.clone();
         this.originalPosition = (Point)this.currentPosition.clone();
+        this.ID = ID;
+    }
 
+    public Point getOriginalPosition()
+    {
+        return this.originalPosition;
+    }
 
+    public Point getCurrentPosition()
+    {
+        return this.currentPosition;
+    }
 
+    public int getID()
+    {
+        return this.ID;
     }
 
     @Override
@@ -49,7 +65,7 @@ public class imageAgent extends Agent {
     @Override
     protected void live() {
         getLogger().info("Belief : finding the color " + RGBColor + "\nSending my belief to the coordinator");
-        ReturnCode code = null;
+        /*ReturnCode code = null;
         while(code != ReturnCode.SUCCESS)
         {
             code = sendMessage(society.COMMUNITY,
@@ -61,9 +77,43 @@ public class imageAgent extends Agent {
         }
         getLogger().info("Message sent, wainting for response");
         StringMessage response = (StringMessage)waitNextMessage();
-        getLogger().info("Response received : " + response.getContent());
+        getLogger().info("Response received : " + response.getContent());*/
+
+        sendAcquisitionRequest(new Point(300,300));
         pause(100000);
 
+    }
+
+    private boolean sendAcquisitionRequest(Point targetPosition)
+    {
+        ReturnCode code = null;
+
+        while(code != ReturnCode.SUCCESS)
+        {
+            code = sendMessage(society.COMMUNITY,
+                                society.GROUP,
+                                society.COORDINATOR_ROLE,
+                                new ObjectMessage<acquisitionMessage>(new acquisitionMessage(targetPosition, this.ID, this.originalPosition))
+            );
+        }
+
+        IntegerMessage responseMessage = (IntegerMessage)waitNextMessage();
+
+        if(responseMessage.getContent() == society.ACQUISITION_GRANTED)
+        {
+            getLogger().info("ACQUISITION GRANTED : Moving to next spot");
+            return true;
+        }
+        else if(responseMessage.getContent() == society.ACQUISITION_DENIED)
+        {
+            getLogger().info("ACQUISITION DENIED : searching for another pixel");
+            return false;
+        }
+        else
+        {
+            getLogger().info("ERROR unknown responseMessage : " + responseMessage.getContent());
+            return false;
+        }
     }
 
     @Override

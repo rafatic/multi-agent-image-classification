@@ -66,7 +66,7 @@ public class guiManager extends JPanel{
                 System.out.println("Button clicked, found " + germsCoordinates.size() + " germs");
                 ArrayList<imageAgent> workers = new ArrayList<>();
                 coordinatorAgent coordinator;
-                if(germsCoordinates.size() != 0)
+                /*if(germsCoordinates.size() != 0)
                 {
                     System.out.println("Germs :");
                     for(Point x: germsCoordinates)
@@ -74,7 +74,7 @@ public class guiManager extends JPanel{
                         System.out.println(x.toString() + " Color " + originalImage.getRGB(x.x, x.y));
                         workers.add(new imageAgent(originalImage.getRGB(x.x, x.y), x));
                     }
-                }
+                }*/
                 //coordinator = new coordinatorAgent(workers);
 
                 coordinatorAgent.main(germsCoordinates, originalImage);

@@ -10,4 +10,7 @@ public class society {
 
     public static ArrayList<String> worker_roles = new ArrayList<>();
 
+    public static final int ACQUISITION_GRANTED = 1;
+    public static final int ACQUISITION_DENIED = 0;
+
 }
