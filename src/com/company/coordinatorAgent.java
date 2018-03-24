@@ -3,6 +3,9 @@ package com.company;
 import madkit.kernel.AbstractAgent;
 import madkit.kernel.Agent;
 import madkit.kernel.Madkit;
+import madkit.kernel.Message;
+import madkit.message.ObjectMessage;
+import madkit.message.StringMessage;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -22,6 +25,9 @@ public class coordinatorAgent extends Agent {
     @Override
     protected void activate() {
         getLogger().info("Activating coordinator agent and workers");
+
+        createGroup(society.COMMUNITY, society.GROUP);
+        requestRole(society.COMMUNITY, society.GROUP, society.COORDINATOR_ROLE);
 
         workers = new ArrayList<>();
         segmentationMap = new int[originalImage.getWidth()][originalImage.getHeight()];
@@ -47,12 +53,25 @@ public class coordinatorAgent extends Agent {
 
     @Override
     protected void live() {
-        super.live();
+        //super.live();
+        //boolean shouldQuit = false;
+        while(true)
+        {
+            StringMessage m = (StringMessage)nextMessage();
+
+            if(m != null)
+            {
+                getLogger().info("Received message from " + m.getSender() + "\n Message : " + m.getContent());
+                sendReply(m, new StringMessage("Message received !"));
+
+            }
+        }
     }
 
     @Override
     protected void end() {
-        super.end();
+        //super.end();
+        pause(100000);
     }
 
     public static void main(ArrayList<Point> germs, BufferedImage image)

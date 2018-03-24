@@ -71,7 +71,7 @@ public class guiManager extends JPanel{
                     System.out.println("Germs :");
                     for(Point x: germsCoordinates)
                     {
-                        System.out.println(x.toString());
+                        System.out.println(x.toString() + " Color " + originalImage.getRGB(x.x, x.y));
                         workers.add(new imageAgent(originalImage.getRGB(x.x, x.y), x));
                     }
                 }
