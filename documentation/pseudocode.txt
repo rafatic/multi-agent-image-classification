@@ -1,0 +1,52 @@
+Algo SMA classification d'image - coeur
+
+publication "Segmentation 3D mutli-objets d'images scanner cardiaques : une approche multi-agents"
+
+
+Agent worker :
+
+- Etape de sélection -> l'utilisateur pointe plusieurs endroits dans chaque objets (germes)	un objet est défini par : une homogénéité et d'intensité, une connexité spatiale
+
+- Etape d'initalisation : placer manuellement et étiqueter (définir l'objet que l'agent va analyser)
+coopération entre les agents de le même etiquette
+compétition entre les agents avec des étiquettes différentes
+
+- Etape d'apprentissage :
+l'agent se "familiarise" avec son environnement direct (voisinnage de degré 1)
+en fonction de l'intensité des pixels voisins, l'agent peut définir sa croyance (quel couleur chercher)
+
+
+- Déplacement d'un agent
+Suit un processus de parcours sous contrainte (= Algorithme de remplissage par diffusion)
+choisit le meilleur voison (notion définie par l'entrainement) pour s'y déplacer
+a chaque déplacement :
+	- envoi d'une requête d'acquisition à l'agent controleur (si refus, choisir le 2eme meilleur pixel, etc)
+	A la fin d'un déplacement, l'agent réévalue le meilleur pixel à acquérir.
+
+----------------------------------------------------------------------------------------
+
+
+Agent controleur :
+	- agent communiquant avec les workers
+	- agent cognitif et intentionnel
+	- décide l'attribution, ou non, d'un pixel aux agents
+	- dispose de deux cartes :
+		- cartes de segmentation -> copie étiquetée de l'image d'origine
+		- carte de voyage -> enregistre le chemin des agents
+
+Requête d'acquisition :
+Lorsqu'un agent worker demande l'acquisition d'un pixel, le coordinateur décide de la facon suivante
+
+Acquisition simple : un worker delande l'acquisition d'un pixel n'appartenant à personne (vierge)
+accepté automatiquement. Le controleur met à jour ses cartes
+
+Coopération :
+Un worker demande l'acquisition d'un pixel acquis par un autre agent ayant la même étiquette -> accpeté si le germe du worker est plus proche que celui du propriétaire du pixel.
+le controleur met en suite à jour ses cartes
+
+Compétition
+Un worker demande l'acquisition d'un pixel acquis par un agent portant une autre etiquette
+-> attribué à l'agent ayant parcouru le moins de chemin (comme pour la coopération)
+la controleur met à jour ses cartes en fonction des changements réalisés
+
+
