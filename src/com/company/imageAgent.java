@@ -65,24 +65,21 @@ public class imageAgent extends Agent {
     @Override
     protected void live() {
         getLogger().info("Belief : finding the color " + RGBColor + "\nSending my belief to the coordinator");
-        /*ReturnCode code = null;
-        while(code != ReturnCode.SUCCESS)
-        {
-            code = sendMessage(society.COMMUNITY,
-                                society.GROUP,
-                                society.COORDINATOR_ROLE,
-                                new StringMessage("Hello from group worker_" + RGBColor + "I believe in finding the color " + RGBColor)
-            );
-            getLogger().info(code.toString());
-        }
-        getLogger().info("Message sent, wainting for response");
-        StringMessage response = (StringMessage)waitNextMessage();
-        getLogger().info("Response received : " + response.getContent());*/
 
         sendAcquisitionRequest(new Point(300,300));
         pause(100000);
 
     }
+
+
+
+    @Override
+    protected void end() {
+        getLogger().info("Desactivation");
+        sendEndOfActivityNotification();
+    }
+
+
 
     private boolean sendAcquisitionRequest(Point targetPosition)
     {
@@ -91,9 +88,9 @@ public class imageAgent extends Agent {
         while(code != ReturnCode.SUCCESS)
         {
             code = sendMessage(society.COMMUNITY,
-                                society.GROUP,
-                                society.COORDINATOR_ROLE,
-                                new ObjectMessage<acquisitionMessage>(new acquisitionMessage(targetPosition, this.ID, this.originalPosition))
+                    society.GROUP,
+                    society.COORDINATOR_ROLE,
+                    new ObjectMessage<acquisitionMessage>(new acquisitionMessage(targetPosition, this.ID, this.originalPosition))
             );
         }
 
@@ -116,20 +113,18 @@ public class imageAgent extends Agent {
         }
     }
 
-    @Override
-    protected void end() {
-        getLogger().info("Desactivation");
-    }
 
-    public void start()
+    private void sendEndOfActivityNotification()
     {
-        executeThisAgent();
-    }
+        ReturnCode code = null;
 
-    public static void main(int nbAgents)
-    {
-        executeThisAgent(nbAgents, true);
+        while(code != ReturnCode.SUCCESS)
+        {
+            code = sendMessage(society.COMMUNITY,
+                                society.GROUP,
+                                society.COORDINATOR_ROLE,
+                                new ObjectMessage<State>(State.ENDING));
+        }
     }
-
 
 }

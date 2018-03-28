@@ -14,6 +14,7 @@ import java.util.ArrayList;
 public class coordinatorAgent extends Agent {
 
     private ArrayList<AbstractAgent> workers;
+    private int nbWorkersAlive;
     private static ArrayList<Point> startingPoints;
     private static BufferedImage originalImage;
     private static String[][] segmentationMap;
@@ -26,11 +27,12 @@ public class coordinatorAgent extends Agent {
 
     @Override
     protected void activate() {
+
         getLogger().info("Activating coordinator agent and workers");
 
         createGroup(society.COMMUNITY, society.GROUP);
         requestRole(society.COMMUNITY, society.GROUP, society.COORDINATOR_ROLE);
-
+        nbWorkersAlive = 0;
         workers = new ArrayList<>();
         segmentationMap = new String[originalImage.getWidth()][originalImage.getHeight()];
         travelMap = new int[originalImage.getWidth()][originalImage.getHeight()];
@@ -57,33 +59,46 @@ public class coordinatorAgent extends Agent {
                 travelMap[p.x][p.y] = a.getID();
             }
             agentId++;
+            nbWorkersAlive++;
+
         }
 
     }
 
     @Override
     protected void live() {
-        //super.live();
-        //boolean shouldQuit = false;
         while(true)
         {
-            /*StringMessage m = (StringMessage)nextMessage();
-
-            if(m != null)
-            {
-                getLogger().info("Received message from " + m.getSender() + "\n Message : " + m.getContent());
-                sendReply(m, new StringMessage("Message received !"));
-
-            }*/
 
             Message m = waitNextMessage();
 
             if(m instanceof ObjectMessage)
             {
+                if(((ObjectMessage) m).getContent() instanceof acquisitionMessage)
+                {
+                    examineAcquisitionRequest((ObjectMessage<acquisitionMessage>)m);
+                }
+                else if(((ObjectMessage) m).getContent() instanceof Agent.State)
+                {
+                    System.out.println("One worker has finished its work");
+                    processStateChange((ObjectMessage<State>)m);
 
-                examineAcquisitionRequest((ObjectMessage<acquisitionMessage>)m);
+                }
+
             }
         }
+    }
+
+    private void processStateChange(ObjectMessage<State> message)
+    {
+        State s = message.getContent();
+
+        if(s == State.ENDING)
+        {
+            nbWorkersAlive--;
+        }
+
+        System.out.println(nbWorkersAlive + " workers left");
     }
 
     private void examineAcquisitionRequest(ObjectMessage<acquisitionMessage> message)
@@ -101,8 +116,8 @@ public class coordinatorAgent extends Agent {
         }
         else
         {
-            int occupantDistance = getDistanceFromStartingPoint((imageAgent)workers.get(travelMap[am.getRequestedPoint().x][am.getRequestedPoint().y]));
-            int askerDistance = getDistanceFromStartingPoint((imageAgent)workers.get(am.getAgentID()));
+            int askerDistance = getDistance(am.getRequestedPoint(), am.getAgentOriginalPosition());
+            int occupantDistance = getDistance(am.getRequestedPoint(), ((imageAgent)workers.get(travelMap[am.getRequestedPoint().x][am.getRequestedPoint().y])).getOriginalPosition());
             // Cooperation
             if(segmentationMap[am.getRequestedPoint().x][am.getRequestedPoint().y].equals(message.getSender().getRole()))
             {
@@ -146,6 +161,11 @@ public class coordinatorAgent extends Agent {
     }
 
 
+
+    private int getDistance(Point a, Point b)
+    {
+        return (Math.abs(a.x - b.x) + Math.abs(a.y - b.y));
+    }
 
     private int getDistanceFromStartingPoint(imageAgent a)
     {
