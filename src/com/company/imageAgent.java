@@ -17,16 +17,18 @@ public class imageAgent extends Agent {
     private Point originalPosition;
     private Point currentPosition;
     private int ID;
+    private int groupId;
 
     private String group;
     private int RGBColor;
 
-    public imageAgent(int RGB, Point position, int ID)
+    public imageAgent(int RGB, Point position, int ID, int groupId)
     {
         this.RGBColor = RGB;
         this.currentPosition = (Point)position.clone();
         this.originalPosition = (Point)this.currentPosition.clone();
         this.ID = ID;
+        this.groupId = groupId;
     }
 
     public Point getOriginalPosition()
@@ -51,13 +53,9 @@ public class imageAgent extends Agent {
 
         createGroup(society.COMMUNITY, society.GROUP);
 
-        if(!society.worker_roles.contains("worker_" + RGBColor))
-        {
-            society.worker_roles.add("worker_" + RGBColor);
-        }
+        requestRole(society.COMMUNITY, society.GROUP, "worker_" + society.worker_roles.get(groupId));
 
-
-        requestRole(society.COMMUNITY, society.GROUP, "worker_" + RGBColor);
+        getLogger().info("Role : worker_" + society.worker_roles.get(groupId));
 
 
     }

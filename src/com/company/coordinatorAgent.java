@@ -15,10 +15,11 @@ public class coordinatorAgent extends Agent {
 
     private ArrayList<AbstractAgent> workers;
     private int nbWorkersAlive;
-    private static ArrayList<Point> startingPoints;
+    private static ArrayList<germ> germs;
     private static BufferedImage originalImage;
     private static String[][] segmentationMap;
     private static int[][] travelMap;
+
 
     /*public coordinatorAgent(ArrayList<imageAgent> workers)
     {
@@ -47,16 +48,16 @@ public class coordinatorAgent extends Agent {
         }
 
         int agentId = 0;
-        for(Point p: startingPoints)
+        for(germ g: germs)
         {
-            imageAgent a = new imageAgent(originalImage.getRGB(p.x, p.y), p, agentId);
+            imageAgent a = new imageAgent(originalImage.getRGB(g.getLocation().x, g.getLocation().y), g.getLocation(), agentId, g.getGroupId());
             if(launchAgent(a, true) == ReturnCode.SUCCESS)
             {
                 this.workers.add(a);
 
-                getLogger().info("Created agent on point " + p.x + ", " + p.y);
-                segmentationMap[p.x][p.y] = "worker_" + originalImage.getRGB(p.x, p.y);
-                travelMap[p.x][p.y] = a.getID();
+                getLogger().info("Created agent on point " + g.getLocation().x + ", " + g.getLocation().y);
+                segmentationMap[g.getLocation().x][g.getLocation().y] = "worker_" + society.worker_roles.get(g.getGroupId());
+                travelMap[g.getLocation().x][g.getLocation().y] = a.getID();
             }
             agentId++;
             nbWorkersAlive++;
@@ -178,9 +179,10 @@ public class coordinatorAgent extends Agent {
         pause(100000);
     }
 
-    public static void main(ArrayList<Point> germs, BufferedImage image)
+    public static void main(ArrayList<germ> createdGerms, BufferedImage image)
     {
-        startingPoints = germs;
+
+        germs = createdGerms;
         originalImage = image;
 
 
