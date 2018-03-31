@@ -45,7 +45,9 @@ public class guiManager extends JPanel{
         lbl_image.setIcon(new ImageIcon(bi));
 
         society.worker_roles.add("Blanc");
+        society.worker_color.add(Color.CYAN);
         society.worker_roles.add("Noir");
+        society.worker_color.add(Color.RED);
 
         cbx_groups.setModel(new DefaultComboBoxModel(society.worker_roles.toArray()));
 
@@ -63,6 +65,7 @@ public class guiManager extends JPanel{
             for(int x = 0; x < image.getWidth(null); x++)
             {
                 bi.setRGB(x, y, image.getRGB(x, y));
+                originalImage.setRGB(x, y, image.getRGB(x, y));
             }
         }
 
@@ -102,7 +105,7 @@ public class guiManager extends JPanel{
                             bi.setRGB(e.getX(), e.getY() +1 , Color.RED.getRGB());
 
                             germsTableModel.addRow(new Object[]{g.getID(), g.getLocation().x + ", " + g.getLocation().y, society.worker_roles.get(g.getGroupId())});
-                            
+
                             tbl_germs.setModel(germsTableModel);
 
 
@@ -110,15 +113,7 @@ public class guiManager extends JPanel{
                             lbl_image.repaint();
 
                         }
-
-
-
                     }
-
-
-
-
-
                 }
 
             }
@@ -154,7 +149,6 @@ public class guiManager extends JPanel{
 
                 ArrayList<imageAgent> workers = new ArrayList<>();
                 coordinatorAgent coordinator;
-
 
                 coordinatorAgent.main(germsList, originalImage);
 

@@ -15,6 +15,7 @@ public class AgentMoves {
     }
 
     public void getInitialPixel(Pixel p) {
+
         visitPixel(p);
     }
 
@@ -29,12 +30,16 @@ public class AgentMoves {
         // TO DO : trouver une bonne formule de outlier facile à calculer
         double Bmin = _avg*0.5;
         double Bmax = _avg*1.5;
+        System.out.println("avg = " + _avg);
+        System.out.println("Bmin = " + Bmin);
+        System.out.println("Bmax = " + Bmax);
+        System.out.println("pixel = " + pixel);
 
         return pixel < Bmin || pixel > Bmax;
     }
 
     public Pixel nextPixel () {
-        double minDeviation = 255;
+        double minDeviation = 256;
         Pixel minPixel = _toVisit.get(0);
         int minIndex = 0;
         for(int i=0; i<_toVisit.size(); i++) {
@@ -83,6 +88,24 @@ public class AgentMoves {
                     System.out.println("("+i+","+j+")");
                 }
             }
+        }
+
+
+        for(int j = 0; j < _img.length; j++)
+        {
+            for(int i = 0; i < _img.length; i++)
+            {
+                if(_img[i][j] == -1)
+                {
+                    System.out.print("X ");
+                }
+                else
+                {
+                    System.out.print("O ");
+                }
+
+            }
+            System.out.print("\n");
         }
     }
 }

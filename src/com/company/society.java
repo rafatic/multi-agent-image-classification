@@ -1,5 +1,6 @@
 package com.company;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 public class society {
@@ -9,6 +10,7 @@ public class society {
     public static final String COORDINATOR_ROLE = "coordination";
 
     public static ArrayList<String> worker_roles = new ArrayList<>();
+    public static ArrayList<Color> worker_color = new ArrayList<>();
 
     public static final int ACQUISITION_GRANTED = 1;
     public static final int ACQUISITION_DENIED = 0;
