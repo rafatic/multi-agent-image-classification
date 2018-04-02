@@ -12,6 +12,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Vector;
 
 public class guiManager extends JPanel{
     private JButton btn_simulate;
@@ -23,6 +24,7 @@ public class guiManager extends JPanel{
     private JComboBox cbx_groups;
     private JLabel lbl_availableGroups;
     private JTable tbl_germs;
+    private JComboBox cbx_colorList;
 
     private ArrayList<Point> germsCoordinates;
 
@@ -31,6 +33,9 @@ public class guiManager extends JPanel{
 
 
     private BufferedImage bi, originalImage;
+
+
+    private ArrayList<String> colorListModel;
 
 
     public guiManager(String imagePath) throws IOException {
@@ -44,10 +49,10 @@ public class guiManager extends JPanel{
 
         lbl_image.setIcon(new ImageIcon(bi));
 
-        society.worker_roles.add("Blanc");
+        /*society.worker_roles.add("Blanc");
         society.worker_color.add(Color.CYAN);
         society.worker_roles.add("Noir");
-        society.worker_color.add(Color.RED);
+        society.worker_color.add(Color.RED);*/
 
         cbx_groups.setModel(new DefaultComboBoxModel(society.worker_roles.toArray()));
 
@@ -58,6 +63,19 @@ public class guiManager extends JPanel{
         germsTableModel.addColumn("Group");
 
         tbl_germs.setModel(germsTableModel);
+
+
+        colorListModel = new ArrayList<String>();
+
+        colorListModel.add("black");
+        colorListModel.add("white");
+        colorListModel.add("gray");
+        colorListModel.add("green");
+        colorListModel.add("blue");
+        colorListModel.add("red");
+        colorListModel.add("magenta");
+        colorListModel.add("yellow");
+        cbx_colorList.setModel(new DefaultComboBoxModel(colorListModel.toArray()));
 
 
         for(int y = 0; y < image.getHeight(null); y++)
@@ -127,7 +145,16 @@ public class guiManager extends JPanel{
                     if(!society.worker_roles.contains(txt_addGroup.getText()))
                     {
                         society.worker_roles.add(txt_addGroup.getText());
-                        cbx_groups.setModel(new DefaultComboBoxModel(society.worker_roles.toArray()));
+                        if(getColorByName(cbx_colorList.getSelectedItem().toString()) != null)
+                        {
+                            society.worker_color.add(getColorByName(cbx_colorList.getSelectedItem().toString()));
+                            cbx_groups.setModel(new DefaultComboBoxModel(society.worker_roles.toArray()));
+                        }
+                        else
+                        {
+                            System.out.println("Unknown color : " + cbx_colorList.getSelectedItem().toString());
+                        }
+
                     }
                     else
                     {
@@ -176,6 +203,16 @@ public class guiManager extends JPanel{
         frame.setLocationByPlatform(true);
         frame.pack();
         frame.setVisible(true);
+    }
+
+
+    private Color getColorByName(String name) {
+        try {
+            return (Color)Color.class.getField(name.toUpperCase()).get(null);
+        } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 
