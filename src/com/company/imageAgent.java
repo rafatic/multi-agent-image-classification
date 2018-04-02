@@ -20,7 +20,6 @@ public class imageAgent extends Agent {
     private int groupId;
     private int[][] image;
 
-    private String group;
     private int greyScale;
 
 
@@ -90,11 +89,11 @@ public class imageAgent extends Agent {
     protected void live() {
         getLogger().info("Belief : finding the color " + greyScale + "\nSending my belief to the coordinator");
         updateStats(currentPixel.color);
-        visitPixel(currentPixel);
+        visitPixel(currentPixel, Math.abs( _avg - currentPixel.color));
 
         while (continueExploration()) {
             Pixel p = nextPixel(); // The agent says "Hey, I want to take this pixel"
-            visitPixel(p); // The coordinator says "Yes you can take it"
+            visitPixel(p, Math.abs( _avg - currentPixel.color)); // The coordinator says "Yes you can take it"
         }
         //printMyPixels();
 
@@ -111,7 +110,7 @@ public class imageAgent extends Agent {
 
 
 
-    private boolean sendAcquisitionRequest(Point targetPosition)
+    private boolean sendAcquisitionRequest(Point targetPosition, double similarityScore)
     {
         ReturnCode code = null;
 
@@ -120,7 +119,7 @@ public class imageAgent extends Agent {
             code = sendMessage(society.COMMUNITY,
                     society.GROUP,
                     society.COORDINATOR_ROLE,
-                    new ObjectMessage<acquisitionMessage>(new acquisitionMessage(targetPosition, this.ID, this.originalPosition))
+                    new ObjectMessage<acquisitionMessage>(new acquisitionMessage(targetPosition, this.ID, this.originalPosition, similarityScore))
             );
         }
 
@@ -157,9 +156,9 @@ public class imageAgent extends Agent {
         }
     }
 
-    public void visitPixel(Pixel p) {
+    public void visitPixel(Pixel p, double similarityScore) {
 
-        if(sendAcquisitionRequest(new Point(p.x, p.y)))
+        if(sendAcquisitionRequest(new Point(p.x, p.y), similarityScore))
         {
             addNeighbours(p);
             image[p.x][p.y] = -1;
@@ -176,8 +175,11 @@ public class imageAgent extends Agent {
 
     private boolean isOutlier(int color) {
         // TO DO : trouver une bonne formule de outlier facile à calculer
-        double Bmin = _avg*0.5;
-        double Bmax = _avg*1.5;
+        //double Bmin = _avg*0.5;
+        //double Bmax = _avg*1.5;
+
+        double Bmin = _avg*0.7;
+        double Bmax = _avg*1.3;
 
         return color < Bmin || color > Bmax;
     }

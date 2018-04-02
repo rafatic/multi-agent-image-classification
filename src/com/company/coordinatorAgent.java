@@ -19,6 +19,7 @@ public class coordinatorAgent extends Agent {
     private int[][] greyScaleImage;
     private static String[][] segmentationMap;
     private int[][] travelMap;
+    private double[][] similarityMap;
 
     private long startTime;
     long endTime;
@@ -41,6 +42,7 @@ public class coordinatorAgent extends Agent {
 
         travelMap = new int[originalImage.getWidth()][originalImage.getHeight()];
         greyScaleImage = new int[originalImage.getWidth()][originalImage.getHeight()];
+        similarityMap = new double[originalImage.getWidth()][originalImage.getHeight()];
         for(int y = 0; y < originalImage.getHeight(); y++)
         {
             for(int x = 0; x < originalImage.getWidth(); x++)
@@ -48,6 +50,7 @@ public class coordinatorAgent extends Agent {
                 segmentationMap[x][y] =  "";
                 travelMap[x][y] = -1;
                 greyScaleImage[x][y] = getGrayScaleFromRGB(originalImage.getRGB(x, y));
+                similarityMap[x][y] = Double.MAX_VALUE;
 
             }
         }
@@ -117,6 +120,7 @@ public class coordinatorAgent extends Agent {
             //getLogger().info("Requested position is available, sending confirmation");
             segmentationMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = message.getSender().getRole();
             travelMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = am.getAgentID();
+            similarityMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = am.getSimilarityScore();
             sendReply(message, new IntegerMessage(society.ACQUISITION_GRANTED));
         }
         else
@@ -135,6 +139,7 @@ public class coordinatorAgent extends Agent {
 
                     segmentationMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = message.getSender().getRole();
                     travelMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = am.getAgentID();
+                    similarityMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = am.getSimilarityScore();
                     sendReply(message, new IntegerMessage(society.ACQUISITION_GRANTED));
                 }
                 else
@@ -143,15 +148,17 @@ public class coordinatorAgent extends Agent {
                     sendReply(message, new IntegerMessage(society.ACQUISITION_DENIED));
                 }
             }
+            // Competition
             else
             {
                 //getLogger().info("Requested position is occupied by an agent of another group (competition)");
-                if(occupantDistance <= askerDistance)
+                if(occupantDistance <= askerDistance && am.getSimilarityScore() < similarityMap[am.getRequestedPoint().x][am.getRequestedPoint().y])
                 {
                     //getLogger().info("Asking agent is closer to the requested point, acquisition granted");
 
                     segmentationMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = message.getSender().getRole();
                     travelMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = am.getAgentID();
+                    similarityMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = am.getSimilarityScore();
                     sendReply(message, new IntegerMessage(society.ACQUISITION_GRANTED));
                 }
                 else
