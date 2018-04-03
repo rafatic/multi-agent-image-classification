@@ -59,7 +59,7 @@ public class coordinatorAgent extends Agent {
         {
 
             imageAgent a = new imageAgent(g.getLocation(), agentId, g.getGroupId(), greyScaleImage);
-            if(launchAgent(a, true) == ReturnCode.SUCCESS)
+            if(launchAgent(a, false) == ReturnCode.SUCCESS)
             {
                 this.workers.add(a);
 
