@@ -178,8 +178,8 @@ public class imageAgent extends Agent {
         //double Bmin = _avg*0.5;
         //double Bmax = _avg*1.5;
 
-        double Bmin = _avg*0.7;
-        double Bmax = _avg*1.3;
+        double Bmin = _avg*0.9;
+        double Bmax = _avg*1.1;
 
         return color < Bmin || color > Bmax;
     }

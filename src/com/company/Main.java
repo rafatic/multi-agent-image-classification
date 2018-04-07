@@ -9,7 +9,7 @@ public class Main extends JPanel {
 
     public static void main(String[] args) throws IOException {
 
-        guiManager ui = new guiManager("./img/casa-blanca-habitations_small.png");
+        guiManager ui = new guiManager("./img/circle.png");
 
         EventQueue.invokeLater(new Runnable()
         {
