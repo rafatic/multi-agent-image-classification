@@ -50,10 +50,10 @@ public class guiManager extends JPanel{
         lbl_image.setIcon(new ImageIcon(bi));
 
 
-        /*society.worker_roles.add("Blanc");
+        society.worker_roles.add("Immeuble");
         society.worker_color.add(Color.BLUE);
-        society.worker_roles.add("Noir");
-        society.worker_color.add(Color.RED);*/
+        society.worker_roles.add("Sol");
+        society.worker_color.add(Color.RED);
 
         cbx_groups.setModel(new DefaultComboBoxModel(society.worker_roles.toArray()));
 

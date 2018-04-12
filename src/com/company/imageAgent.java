@@ -168,9 +168,10 @@ public class imageAgent extends Agent {
 
     private void updateStats(int color) {
         n ++;
-        if (n == 1) {
+        /*if (n < 30) {
             _avg = (_avg * (n - 1) + color) / n;
-        }
+        }*/
+		_avg = (_avg * (n - 1) + color) / n;
     }
 
     private boolean isOutlier(int color) {
@@ -178,8 +179,11 @@ public class imageAgent extends Agent {
         //double Bmin = _avg*0.5;
         //double Bmax = _avg*1.5;
 
-        double Bmin = _avg*0.9;
-        double Bmax = _avg*1.1;
+        //double Bmin = _avg*0.75;
+        //double Bmax = _avg*1.25;
+
+        double Bmin = _avg - 30;
+        double Bmax = _avg + 30;
 
         return color < Bmin || color > Bmax;
     }
