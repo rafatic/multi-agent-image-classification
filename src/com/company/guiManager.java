@@ -2,6 +2,7 @@ package com.company;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -25,6 +26,7 @@ public class guiManager extends JPanel{
     private JLabel lbl_availableGroups;
     private JTable tbl_germs;
     private JComboBox cbx_colorList;
+    private JButton btn_openFile;
 
     private ArrayList<Point> germsCoordinates;
 
@@ -50,10 +52,10 @@ public class guiManager extends JPanel{
         lbl_image.setIcon(new ImageIcon(bi));
 
 
-        society.worker_roles.add("Immeuble");
+        /*society.worker_roles.add("Immeuble");
         society.worker_color.add(Color.BLUE);
         society.worker_roles.add("Sol");
-        society.worker_color.add(Color.RED);
+        society.worker_color.add(Color.RED);*/
 
         cbx_groups.setModel(new DefaultComboBoxModel(society.worker_roles.toArray()));
 
@@ -182,6 +184,42 @@ public class guiManager extends JPanel{
 
             }
         });
+
+        btn_openFile.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.setCurrentDirectory(new File("./"));
+
+				int result = fileChooser.showOpenDialog(getParent());
+
+				if(result == JFileChooser.APPROVE_OPTION)
+				{
+
+					File selectedFile = fileChooser.getSelectedFile();
+					if(selectedFile.isFile())
+					{
+						if(selectedFile.getName().endsWith(".gif") ||
+							selectedFile.getName().endsWith(".bmp") ||
+							selectedFile.getName().endsWith(".png") ||
+							selectedFile.getName().endsWith(".jpg") ||
+							selectedFile.getName().endsWith(".jpeg"))
+						{
+							setImageToSegment(selectedFile);
+						}
+						else
+						{
+							JOptionPane.showMessageDialog(getParent(), "ERROR : This file format is not supported.\nPlease select a file with one of the following formats :\n.gif .bmp .png .jpg . jpeg");
+						}
+					}
+					else
+					{
+						JOptionPane.showMessageDialog(getParent(), "ERROR : Please select a file");
+					}
+				}
+			}
+		});
     }
 
     public ArrayList<Point> getGermsCoordinates() {
@@ -215,6 +253,35 @@ public class guiManager extends JPanel{
             return null;
         }
     }
+
+    private void setImageToSegment(File imageFile)
+	{
+		BufferedImage image = null;
+		try {
+			image = ImageIO.read(imageFile);
+
+
+			bi = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+			originalImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+
+			lbl_image.setIcon(new ImageIcon(bi));
+
+			for(int y = 0; y < image.getHeight(null); y++)
+			{
+				for(int x = 0; x < image.getWidth(null); x++)
+				{
+					bi.setRGB(x, y, image.getRGB(x, y));
+					originalImage.setRGB(x, y, image.getRGB(x, y));
+				}
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+
+
+	}
 
 
 }
