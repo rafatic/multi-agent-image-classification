@@ -9,28 +9,35 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 
-
+/* The coordinator agent is a single agent managing the different workers. It keeps track of the ongoing segmentation
+ * and decides whether a worker can acquire a pixel (see acquisitionMessage).
+*/
 public class coordinatorAgent extends Agent {
 
+    // List of workers agents
     private ArrayList<AbstractAgent> workers;
+    // Number of workers still working
     private int nbWorkersAlive;
+    // List of germs where the workers will be created
     private static ArrayList<germ> germs;
+    // Image to segment
     private static BufferedImage originalImage;
+    // A copy of the original image in grey scales
     private int[][] greyScaleImage;
+    // Map of the segmentation, keeps track of every pixel state (acquired or not, by whom)
     private static String[][] segmentationMap;
+    // Keeps track of the workers location, a cell contains the ID of the agent who acquired the pixel
+    // the cell contains "" if it is available
     private int[][] travelMap;
+    // Used to store the acquisition score of each pixel (-1 if no agent has acquired the pixel)
     private double[][] similarityMap;
 
-    private long startTime;
-    long endTime;
 
 
 
+    // Called when the agent is created
     @Override
     protected void activate() {
-        startTime = System.currentTimeMillis();
-
-
 
         getLogger().info("Activating coordinator agent and workers");
 
@@ -38,11 +45,13 @@ public class coordinatorAgent extends Agent {
         requestRole(society.COMMUNITY, society.GROUP, society.COORDINATOR_ROLE);
         nbWorkersAlive = 0;
         workers = new ArrayList<>();
-        segmentationMap = new String[originalImage.getWidth()][originalImage.getHeight()];
 
+        // Initiation of the differents maps
+        segmentationMap = new String[originalImage.getWidth()][originalImage.getHeight()];
         travelMap = new int[originalImage.getWidth()][originalImage.getHeight()];
         greyScaleImage = new int[originalImage.getWidth()][originalImage.getHeight()];
         similarityMap = new double[originalImage.getWidth()][originalImage.getHeight()];
+
         for(int y = 0; y < originalImage.getHeight(); y++)
         {
             for(int x = 0; x < originalImage.getWidth(); x++)
@@ -55,6 +64,8 @@ public class coordinatorAgent extends Agent {
             }
         }
         int agentId = 0;
+
+        // Launch worker agents
         for(germ g: germs)
         {
 
@@ -76,6 +87,11 @@ public class coordinatorAgent extends Agent {
 
     @Override
     protected void live() {
+        // While there is at least on worker in the "active" state
+        // In this loop, the coordinator waits for any message.
+        // It can receive two types of message :
+        //      - acquisitionMessage : a worker requests access of a pixel
+        //      - State message : a worker notifies its end
         while(nbWorkersAlive > 0)
         {
             Message m = waitNextMessage();
@@ -97,6 +113,7 @@ public class coordinatorAgent extends Agent {
         }
     }
 
+    // When a worker notifies its end, update the number of workers alive
     private void processStateChange(ObjectMessage<State> message)
     {
         State s = message.getContent();
@@ -109,15 +126,15 @@ public class coordinatorAgent extends Agent {
         System.out.println(nbWorkersAlive + " workers left");
     }
 
+    // Decides whether an acquisition request must be accepted or not
     private void examineAcquisitionRequest(ObjectMessage<acquisitionMessage> message)
     {
-
-        //Point requestedPosition = message.getContent();
         acquisitionMessage am = message.getContent();
-        //getLogger().info("Received acquisition request on " + requestedPosition.toString() + " by " + message.getSender().getSimpleAgentNetworkID() + " ( role : " + message.getSender().getRole() + ")");
+
+        // If the requested pixel has not been segmented yet
         if(segmentationMap[am.getRequestedPoint().x][am.getRequestedPoint().y].equals(""))
         {
-            //getLogger().info("Requested position is available, sending confirmation");
+            // The acquisition is accepted by default
             segmentationMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = message.getSender().getRole();
             travelMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = am.getAgentID();
             similarityMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = am.getSimilarityScore();
@@ -127,16 +144,17 @@ public class coordinatorAgent extends Agent {
         {
             int askerDistance = getDistance(am.getRequestedPoint(), am.getAgentOriginalPosition());
             int occupantDistance = getDistance(am.getRequestedPoint(), ((imageAgent)workers.get(travelMap[am.getRequestedPoint().x][am.getRequestedPoint().y])).getOriginalPosition());
-            // Cooperation
+
+            // If the requested pixel has already been segmented by an agent of the same group : COOPERATION
             if(segmentationMap[am.getRequestedPoint().x][am.getRequestedPoint().y].equals(message.getSender().getRole()))
             {
-                //getLogger().info("Requested position is occupied by an agent of the same group (cooperation)");
+                // Compare the distances between each agent starting location and the position of the requested pixel
+                // The agent closest to the pixel will win
 
 
                 if(occupantDistance <= askerDistance)
                 {
-                    //getLogger().info("Asking agent is closer to the requested point, acquisition granted");
-
+                    // Acquisition granted
                     segmentationMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = message.getSender().getRole();
                     travelMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = am.getAgentID();
                     similarityMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = am.getSimilarityScore();
@@ -144,18 +162,19 @@ public class coordinatorAgent extends Agent {
                 }
                 else
                 {
-                    //getLogger().info("Occupant agent is closer to the requested point, acquisition denied");
+                    // Acquisition denied
                     sendReply(message, new IntegerMessage(society.ACQUISITION_DENIED));
                 }
             }
-            // Competition
+
+            // If the requested pixel has already been segmented by an agent of another group : COMPETITION
             else
             {
-                //getLogger().info("Requested position is occupied by an agent of another group (competition)");
+                // We compare the similarity score of each agent and the distance between the agents starting location and the requested pixel.
+                // The agent with the highest score will win
                 if(occupantDistance <= askerDistance && am.getSimilarityScore() < similarityMap[am.getRequestedPoint().x][am.getRequestedPoint().y])
                 {
-                    //getLogger().info("Asking agent is closer to the requested point, acquisition granted");
-
+                    // Acquisition granted
                     segmentationMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = message.getSender().getRole();
                     travelMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = am.getAgentID();
                     similarityMap[am.getRequestedPoint().x][am.getRequestedPoint().y] = am.getSimilarityScore();
@@ -163,13 +182,11 @@ public class coordinatorAgent extends Agent {
                 }
                 else
                 {
-                    //getLogger().info("Occupant agent is closer to the requested point, acquisition denied");
+                    // Acquisition denied
                     sendReply(message, new IntegerMessage(society.ACQUISITION_DENIED));
                 }
             }
-
         }
-
     }
 
 
@@ -179,11 +196,7 @@ public class coordinatorAgent extends Agent {
         return (Math.abs(a.x - b.x) + Math.abs(a.y - b.y));
     }
 
-    private int getDistanceFromStartingPoint(imageAgent a)
-    {
-        return (Math.abs(a.getCurrentPosition().x - a.getOriginalPosition().x) + (Math.abs(a.getCurrentPosition().y - a.getOriginalPosition().y)));
-    }
-
+    // Get the gray scale value from an RGB color
     private int getGrayScaleFromRGB(int rgb)
     {
         int r = (rgb >> 16) & 0xFF;
@@ -193,18 +206,9 @@ public class coordinatorAgent extends Agent {
         return (r + g + b) / 3;
     }
 
-    public static BufferedImage copyImage(BufferedImage source){
-        BufferedImage b = new BufferedImage(source.getWidth(), source.getHeight(), source.getType());
-        Graphics g = b.getGraphics();
-        g.drawImage(source, 0, 0, null);
-        g.dispose();
-        return b;
-    }
-
+    // When the coordinator ends, show the segmented result and save it in a file.
     @Override
     protected void end() {
-        endTime = System.currentTimeMillis();
-        System.out.println("Execution time : " + ((endTime - startTime) / 1000) + " seconds");
         segmentationResultDialog resultDialog = new segmentationResultDialog();
         resultDialog.showDialog(segmentationMap);
     }

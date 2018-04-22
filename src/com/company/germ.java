@@ -2,6 +2,8 @@ package com.company;
 
 import java.awt.*;
 
+// A germs defines the starting location of an agent.
+// A germ also contains the group and ID of the future agent
 public class germ {
 
     private Point location;

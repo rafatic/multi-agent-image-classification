@@ -2,6 +2,10 @@ package com.company;
 
 import java.awt.*;
 
+/* An acquisition message is sent by a worker agent to the coordinator when the worker wants to acquire a pixel
+ * The message contains the coordinates of the requested pixel, the ID of the sender, the original position of the sender (germ)
+ * and a score representing the difference between the agent's belief and the requested pixel value.
+*/
 public class acquisitionMessage {
     private Point requestedPoint;
     private int agentID;

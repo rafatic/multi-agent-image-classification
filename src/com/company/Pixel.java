@@ -8,7 +8,6 @@ public class Pixel {
 
 
     public int color;
-    public double deviation;
 
     Pixel(int x, int y, int ncolor) {
         this.x = x;

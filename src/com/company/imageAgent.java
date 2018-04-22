@@ -12,12 +12,17 @@ public class imageAgent extends Agent {
     public static final String COMMUNITY = "execution";
     public static final String ROLE = "image agent";
 
+    // Pixel under germ location
     private Pixel originalPixel;
+    // pixel under the agent's current position
     private Pixel currentPixel;
+    // germ position
     private Point originalPosition;
+    // Agent's current location in the image
     private Point currentPosition;
     private int ID;
     private int groupId;
+    // Copy og the image to segment
     private int[][] image;
 
     private int greyScale;
@@ -27,6 +32,7 @@ public class imageAgent extends Agent {
 
     private double _avg = 0; // Average greyScale value of each pixels acquired
     private double n = 0; // Number of taken pixels
+	// List of neighbouring pixels.
     private ArrayList<Pixel> _toVisit = new ArrayList<Pixel>();
 
     public imageAgent(Point position, int ID, int groupId, int[][] greyScaleImage)
@@ -70,7 +76,8 @@ public class imageAgent extends Agent {
 
 
 
-
+	// When the agent is created, it sets its roles and group.
+	// its role and group will help it identify itself when communicating with the coordinator
     @Override
     protected void activate() {
         getLogger().info("Image agent activated on point " + originalPosition.x + ", " + currentPosition.y);
@@ -88,14 +95,17 @@ public class imageAgent extends Agent {
     @Override
     protected void live() {
         getLogger().info("Belief : finding the color " + greyScale + "\nSending my belief to the coordinator");
+        // Updates its belief
         updateStats(currentPixel.color);
+        // Find the first pixel to explore
         visitPixel(currentPixel, Math.abs( _avg - currentPixel.color));
 
+        // While there is at least on pixel to explore
         while (continueExploration()) {
+
             Pixel p = nextPixel(); // The agent says "Hey, I want to take this pixel"
             visitPixel(p, Math.abs( _avg - currentPixel.color)); // The coordinator says "Yes you can take it"
         }
-        //printMyPixels();
 
 
     }
@@ -109,7 +119,7 @@ public class imageAgent extends Agent {
     }
 
 
-
+	// Sends an acquisitionMessage for a given pixel
     private boolean sendAcquisitionRequest(Point targetPosition, double similarityScore)
     {
         ReturnCode code = null;
@@ -127,16 +137,17 @@ public class imageAgent extends Agent {
 
         if(responseMessage.getContent() == society.ACQUISITION_GRANTED)
         {
-            //getLogger().info("ACQUISITION GRANTED : Moving to next spot");
+            // Acquisition granted
             return true;
         }
         else if(responseMessage.getContent() == society.ACQUISITION_DENIED)
         {
-            //getLogger().info("ACQUISITION DENIED : searching for another pixel");
+            // Acquisition denied
             return false;
         }
         else
         {
+        	// Unknown response
             getLogger().info("ERROR unknown responseMessage : " + responseMessage.getContent());
             return false;
         }
@@ -168,19 +179,12 @@ public class imageAgent extends Agent {
 
     private void updateStats(int color) {
         n ++;
-        /*if (n < 30) {
-            _avg = (_avg * (n - 1) + color) / n;
-        }*/
+
 		_avg = (_avg * (n - 1) + color) / n;
     }
 
     private boolean isOutlier(int color) {
-        // TO DO : trouver une bonne formule de outlier facile à calculer
-        //double Bmin = _avg*0.5;
-        //double Bmax = _avg*1.5;
 
-        //double Bmin = _avg*0.75;
-        //double Bmax = _avg*1.25;
 
         double Bmin = _avg - 30;
         double Bmax = _avg + 30;
